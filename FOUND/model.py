@@ -36,7 +36,7 @@ class FIND(nn.Module):
 
 		opts = process_opts(opts_loc)
 		opts.load_model = model_loc
-		opts.device = 'cpu' # for compatibility
+		opts.device = 'cuda'
 		self.model = model_from_opts(opts)
 
 		# define parameters

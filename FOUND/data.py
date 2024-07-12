@@ -1,7 +1,7 @@
 from torch.utils.data import Dataset
 import numpy as np
 from utils.normal import kappa_to_alpha_np
-from utils.colmap import load_colmap_data
+from utils.colmap import load_colmap_data, raw_load_colmap_data
 from pytorch3d.renderer.cameras import get_world_to_view_transform
 import os
 import cv2
@@ -33,7 +33,7 @@ class Cacher():
 
 class FootScanDataset(Dataset):
 	"""Load a multiview captured foot scan dataset."""
-	def __init__(self, src, targ_img_size, folder_names: dict):
+	def __init__(self, src, targ_img_size, folder_names: dict, raw_colmap: bool):
 		"""
 
 		:param src:
@@ -59,7 +59,10 @@ class FootScanDataset(Dataset):
 		# load colmap data
 		colmap_loc = os.path.join(src, 'colmap.json')
 		if os.path.isfile(colmap_loc):
-			self.colmap_data = load_colmap_data(colmap_loc)
+			if raw_colmap:
+				self.colmap_data = raw_load_colmap_data(colmap_loc)
+			else:
+				self.colmap_data = load_colmap_data(colmap_loc)
 		else:
 			raise FileNotFoundError(f"Colmap data not found at {colmap_loc}")
 
