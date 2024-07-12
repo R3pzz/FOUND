@@ -53,7 +53,7 @@ def main(args):
 
 
 	folder_names = dict(rgb=args.rgb_folder, norm=args.norm_folder, norm_unc=args.norm_unc_folder)
-	dataset = FootScanDataset(args.data_folder, targ_img_size=args.targ_img_size, folder_names=folder_names)
+	dataset = FootScanDataset(args.data_folder, targ_img_size=args.targ_img_size, folder_names=folder_names, raw_colmap=args.raw_colmap)
 	
 	if args.restrict_num_views is not None:
 		dataset.restrict_views(args.restrict_num_views)
