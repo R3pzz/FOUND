@@ -20,8 +20,8 @@ from utils.pytorch3d import export_mesh
 
 Stage = namedtuple('Stage', 'name num_epochs lr params losses')
 DEFAULT_STAGES = [
-	Stage('Registration', 50, .001, ['reg'], ['kp_nll']),
-	Stage('Deform verts', 250, .001, ['deform', 'reg'], ['kp_nll', 'sil', 'norm_nll']),
+#	Stage('Registration', 50, .001, ['reg'], ['kp_nll']),
+	Stage('Deform verts', 250, .001, ['deform', 'reg'], ['sil', 'norm_nll']),
 ]
 
 

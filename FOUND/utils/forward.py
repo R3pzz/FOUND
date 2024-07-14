@@ -3,8 +3,6 @@ from . import normal_losses
 from pytorch3d.loss import mesh_laplacian_smoothing, mesh_normal_consistency, mesh_edge_loss
 
 
-#KP_LOSSES = ['kp_l1', 'kp_l2', 'kp_nll']
-KP_LOSSES = [] # We'd want to disable the keypoint loss in here.
 NORM_LOSSES = ['norm_al', 'norm_nll']
 LOSS_KEYS = ['sil', 'smooth', 'edge'] + NORM_LOSSES + KP_LOSSES
 
@@ -51,26 +49,6 @@ def calc_losses(res: dict, batch: dict, loss_list: list, aux: dict) -> dict:
 
 	if 'edge' in loss_list:
 		loss_dict['edge'] = mesh_edge_loss(res['new_mesh'])
-
-	if any(k in loss_list for k in KP_LOSSES):
-		y = res['kps']
-		mu, visibility = batch['kps'][..., :2], batch['kps'][..., 2:]
-		var = batch['kps_unc']
-
-		if 'kp_l1' in loss_list:
-			loss_kp = torch.abs(y - mu)
-			key = 'kp_l1'
-
-		elif 'kp_l2' in loss_list:
-			loss_kp = torch.square(y - mu)
-			key = 'kp_l2'
-
-		elif 'kp_nll' in loss_list:
-			loss_kp = (torch.square(y - mu) / (var + 1e-10))
-			key = 'kp_nll'
-
-		else:
-			raise ValueError("Invalid keypoint loss")
 
 		H, W = aux['img_size']
 		loss_dict[key] = (loss_kp * visibility).mean() / ((H + W) / 2)

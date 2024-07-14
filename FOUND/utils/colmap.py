@@ -66,27 +66,27 @@ def raw_load_colmap_data(colmap_dir: str, image_list: list = None):
 	params = {}
 	
 	with open(colmap_dir + COLMAP_IMAGES, "r") as imgfile:
-		data = imgfile.read().split(" ")
+		data = imgfile.read().replace('\n', ' ').split(' ')
 		
 		for i, token in enumerate(data):
 			if token.endswith(EXTENSION):
 				# We've reached the last image description token - filename
 				# Now, read the previous 8 tokens.
-				params = data[i-8:i]
-				q3 = params[0]
-				q0 = params[1]
-				q1 = params[2]
-				q2 = params[3]
-				tx = params[4]
-				ty = params[5]
-				tz = params[6]
-				img_name = _remove_ext(params[8])
+				img_params = data[i-8:i]
+				q3 = img_params[0]
+				q0 = img_params[1]
+				q1 = img_params[2]
+				q2 = img_params[3]
+				tx = img_params[4]
+				ty = img_params[5]
+				tz = img_params[6]
+				img_name = _remove_ext(img_params[8])
 				
 				rot[img_name] = quat_to_3x3([float(q0), float(q1), float(q2), float(q3)])
 				tr[img_name] = np.array([tx, ty, tz]).astype(float)
 	
 	with open(colmap_dir + COLMAP_CAMERAS, "r") as camfile:
-		data = camfile.readlines()[3].split(" ")
+		data = camfile.readlines()[3].replace('\n', ' ').split(' ')
 		params["f"] = float(data[4])
 		params["cx"] = float(data[5])
 		params["cy"] = float(data[6])
