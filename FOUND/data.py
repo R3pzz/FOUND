@@ -57,14 +57,23 @@ class FootScanDataset(Dataset):
 			self.idxs.append(_remove_ext(f))
 
 		# load colmap data
-		colmap_loc = os.path.join(src, 'colmap.json')
-		if os.path.isfile(colmap_loc):
-			if raw_colmap:
-				self.colmap_data = raw_load_colmap_data(colmap_loc)
-			else:
-				self.colmap_data = load_colmap_data(colmap_loc)
+		if raw_colmap:
+			colmap_files = ['cameras.txt', 'images.txt']
+			# Check if the colmap data is there
+			for f in colmap_files:
+				if not os.path.isfile(os.path.join(src, 'colmap', f)):
+					raise FileNotFoundError(f"Colmap data not found in {src}")
+			
+			# Load the raw colmap data
+			self.colmap_data = raw_load_colmap_data(os.path.join(src, 'colmap'))
 		else:
-			raise FileNotFoundError(f"Colmap data not found at {colmap_loc}")
+			colmap_loc = os.path.join(src, 'colmap.json')
+			# Check for the colmap file
+			if not os.path.isfile(colmap_loc):
+				raise FileNotFoundError(f"Colmap data not found in {src}")
+			
+			# Load converted colmap data
+			self.colmap_data = load_colmap_data(colmap_loc)
 
 		# get image height to work out scaling factor
 		# NOTE: assumes all images have same height
