@@ -65,7 +65,7 @@ def raw_load_colmap_data(colmap_dir: str, image_list: list = None):
 	tr = {}
 	params = {}
 	
-	with open(colmap_dir + COLMAP_IMAGES, "rb") as imgfile:
+	with open(colmap_dir + COLMAP_IMAGES, "r") as imgfile:
 		data = imgfile.read().split(" ")
 		
 		for i, token in enumerate(data):
@@ -83,12 +83,12 @@ def raw_load_colmap_data(colmap_dir: str, image_list: list = None):
 				img_name = _remove_ext(params[8])
 				
 				rot[img_name] = quat_to_3x3([float(q0), float(q1), float(q2), float(q3)])
-				tr[img_name] = np.array([tx, ty, tz])
+				tr[img_name] = np.array([tx, ty, tz]).astype(float)
 	
-	with open(colmap_dir + COLMAP_CAMERAS, "rb") as camfile:
-		data = camfile.readlines()[2].split(" ")
-		params["f"] = data[4]
-		params["cx"] = data[5]
-		params["cy"] = data[6]
+	with open(colmap_dir + COLMAP_CAMERAS, "r") as camfile:
+		data = camfile.readlines()[3].split(" ")
+		params["f"] = float(data[4])
+		params["cx"] = float(data[5])
+		params["cy"] = float(data[6])
 	
 	return dict(image_list=image_list, R=rot, T=tr, params=params)
