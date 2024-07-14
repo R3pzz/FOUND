@@ -69,7 +69,10 @@ def raw_load_colmap_data(colmap_dir: str, image_list: list = None):
 		data = imgfile.read().split(" ")
 		
 		for i, token in enumerate(data):
-			if token.endswith(EXTENSION) and token in image_list:
+			if token.endswith(EXTENSION):
+				if image_list and token not in image_list:
+					continue
+				
 				# We've reached the last image description token - filename
 				# Now, read the previous 8 tokens.
 				params = data[i-8:i]
