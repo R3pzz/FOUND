@@ -50,7 +50,4 @@ def calc_losses(res: dict, batch: dict, loss_list: list, aux: dict) -> dict:
 	if 'edge' in loss_list:
 		loss_dict['edge'] = mesh_edge_loss(res['new_mesh'])
 
-		H, W = aux['img_size']
-		loss_dict[key] = (loss_kp * visibility).mean() / ((H + W) / 2)
-
 	return loss_dict
