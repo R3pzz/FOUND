@@ -72,7 +72,7 @@ def raw_load_colmap_data(colmap_dir: str, image_list: list = None):
 			if token.endswith(EXTENSION):
 				# We've reached the last image description token - filename
 				# Now, read the previous 8 tokens.
-				img_params = data[i-8:i]
+				img_params = data[i-8:i+1]
 				q3 = img_params[0]
 				q0 = img_params[1]
 				q1 = img_params[2]

@@ -4,7 +4,7 @@ from pytorch3d.loss import mesh_laplacian_smoothing, mesh_normal_consistency, me
 
 
 NORM_LOSSES = ['norm_al', 'norm_nll']
-LOSS_KEYS = ['sil', 'smooth', 'edge'] + NORM_LOSSES + KP_LOSSES
+LOSS_KEYS = ['sil', 'smooth', 'edge'] + NORM_LOSSES
 
 mse_loss = torch.nn.MSELoss(reduction='none')
 normal_crit_al = normal_losses.AL()

@@ -15,7 +15,7 @@ from model import FIND
 from utils import produce_grid, show_kps, show_kp_err, seg_overlap # visualisation tools
 from utils.args import FitArgs, save_args
 from utils import Renderer
-from utils.forward import batch_to_device, calc_losses, LOSS_KEYS, KP_LOSSES, idx_batch
+from utils.forward import batch_to_device, calc_losses, LOSS_KEYS, idx_batch
 from utils.pytorch3d import export_mesh
 
 Stage = namedtuple('Stage', 'name num_epochs lr params losses')
@@ -84,10 +84,6 @@ def main(args):
 
 	for stage_idx, stage in enumerate(STAGES):
 		optimiser = torch.optim.Adam(model.get_params(stage.params), lr=stage.lr)
-
-		if len([l for l in stage.losses if l in KP_LOSSES]) > 1:
-			raise ValueError("Only one form of keypoint loss per stage is supported.")
-
 		stage_loss_log = defaultdict(lambda: defaultdict(list))
 
 		render_normals = 'norm_nll' in stage.losses or 'norm_al' in stage.losses
