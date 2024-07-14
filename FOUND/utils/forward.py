@@ -3,7 +3,8 @@ from . import normal_losses
 from pytorch3d.loss import mesh_laplacian_smoothing, mesh_normal_consistency, mesh_edge_loss
 
 
-KP_LOSSES = ['kp_l1', 'kp_l2', 'kp_nll']
+#KP_LOSSES = ['kp_l1', 'kp_l2', 'kp_nll']
+KP_LOSSES = [] # We'd want to disable the keypoint loss in here.
 NORM_LOSSES = ['norm_al', 'norm_nll']
 LOSS_KEYS = ['sil', 'smooth', 'edge'] + NORM_LOSSES + KP_LOSSES
 
