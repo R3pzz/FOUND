@@ -90,8 +90,8 @@ def _helper_read_colmap_images_txt(colmap_dir: str, image_list: list = None):
 					
 					# Parse the image info
 					file_name_no_ext = _remove_ext(line[token_to_index['name']])
-					rot_quat = np.array([float(v) for v in line[token_to_index['rot_qw']:token_to_index['rot_qz']]])
-					tr_vec = np.array([float(v) for v in line[token_to_index['trans_x']:token_to_index['trans_z']]])
+					rot_quat = np.array([float(v) for v in line[token_to_index['rot_qw']-1:token_to_index['rot_qz']]])
+					tr_vec = np.array([float(v) for v in line[token_to_index['trans_x']-1:token_to_index['trans_z']]])
 					# np.roll(rot_quat, -1)
 
 					rot[file_name_no_ext] = _rot_q_to_3x3(rot_quat)
