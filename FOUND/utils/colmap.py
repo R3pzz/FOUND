@@ -75,7 +75,7 @@ def _helper_read_colmap_images_txt(colmap_dir: str, image_list: list = None):
 
 	with open(colmap_dir + COLMAP_IMAGES, "r") as f:
 		# Read the file contents into an array of lines where each line is a set of tokens that form it.
-		data = f.readlines().split(' ')
+		data = f.readlines()
 		data = [list(filter(None, line.replace('\n', '').split(' '))) for line in data]
 
 		# Find each line containing a token that ends with .jpg
