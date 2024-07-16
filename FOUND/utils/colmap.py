@@ -103,20 +103,18 @@ def _helper_read_colmap_cameras_txt(colmap_dir: str):
 	COLMAP_CAMERAS = "/cameras.txt"
 
 	params = {}
-	with open(colmap_dir + COLMAP_CAMERAS, "r") as f:
+	with open(colmap_dir + COLMAP_CAMERAS, 'r') as f:
 		data = f.readlines()[3].replace('\n', ' ').split(' ')
-		params["f"] = float(data[4])
-		params["cx"] = float(data[5])
-		params["cy"] = float(data[6])
+		params['width'] = float(data[2])
+		params['height'] = float(data[3])
+		params['f'] = float(data[4])
+		params['cx'] = float(data[5])
+		params['cy'] = float(data[6])
+		params['k'] = float(data[7])
 	
 	return params
 
 def raw_load_colmap_data(colmap_dir: str, image_list: list = None):
-	COLMAP_CAMERAS = "/cameras.txt"
-	COLMAP_IMAGES = "/images.txt"
-	EXTENSION = ".jpg"
-	
 	image_data = _helper_read_colmap_images_txt(colmap_dir, image_list)
 	camera_data = _helper_read_colmap_cameras_txt(colmap_dir)
-	
 	return dict(image_list=image_list, R=image_data['R'], T=image_data['T'], params=camera_data)
