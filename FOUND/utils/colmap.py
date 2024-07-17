@@ -55,6 +55,7 @@ Load raw colmap data from automatic reconstruction
 
 def _helper_read_colmap_images_txt(colmap_dir: str, image_list: list = None):
 	COLMAP_IMAGES = "/images.txt"
+	SUPPORTED_EXTENSIONS = [".jpg", ".png"]
 	
 	# Token-to-index lookup table for easier parsing.
 	token_to_index = {
@@ -81,7 +82,7 @@ def _helper_read_colmap_images_txt(colmap_dir: str, image_list: list = None):
 		# Find each line containing a token that ends with .jpg
 		for line in data:
 			for token in line:
-				if token.endswith('.jpg'):
+				if token.endswith(SUPPORTED_EXTENSIONS):
 					if len(line) != 10:
 						raise RuntimeError('malformed colmap images.txt file')
 					
@@ -94,7 +95,7 @@ def _helper_read_colmap_images_txt(colmap_dir: str, image_list: list = None):
 					tr_vec = np.array([float(v) for v in line[token_to_index['trans_x']-1:token_to_index['trans_z']]])
 					# np.roll(rot_quat, -1)
 
-					rot[file_name_no_ext] = _rot_q_to_3x3(rot_quat)
+					rot[file_name_no_ext] = _rot_q_to_3x3(rot_quat).T
 					tr[file_name_no_ext] = tr_vec
 		
 	return dict(R=rot, T=tr)
