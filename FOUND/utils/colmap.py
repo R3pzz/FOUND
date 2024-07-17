@@ -55,7 +55,7 @@ Load raw colmap data from automatic reconstruction
 
 def _helper_read_colmap_images_txt(colmap_dir: str, image_list: list = None):
 	COLMAP_IMAGES = "/images.txt"
-	SUPPORTED_EXTENSIONS = [".jpg", ".png"]
+	SUPPORTED_EXTENSIONS = tuple(".jpg", ".png")
 	
 	# Token-to-index lookup table for easier parsing.
 	token_to_index = {
