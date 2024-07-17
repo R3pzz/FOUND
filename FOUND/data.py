@@ -140,7 +140,7 @@ class FootScanDataset(Dataset):
 		self.idxs = [self.idxs[i] for i in cam_idxs]
 
 
-	def load_img(self, directory: str, loc: str, targ_size = None, raw=False) -> np.ndarray:
+	def load_img(self, directory: str, loc: str, targ_size = None, grayscale=False) -> np.ndarray:
 		"""
 		Loads first image found with any of valid filetypes.
 		Loads as float, [0 - 1]
@@ -153,8 +153,8 @@ class FootScanDataset(Dataset):
 		for e in VALID_EXTS:
 			pth = os.path.join(self.src, directory, f'{loc}.{e}')
 			if os.path.isfile(pth):
-				if raw:
-					rgb = cv2.imread(pth, cv2.IMREAD_UNCHANGED)
+				if grayscale:
+					rgb = cv2.imread(pth, cv2.IMREAD_GRAYSCALE)
 				else:
 					rgb = cv2.cvtColor(cv2.imread(pth), cv2.COLOR_BGR2RGB)
 
@@ -181,7 +181,7 @@ class FootScanDataset(Dataset):
 
 		rgb = self.load_img(self.rgb_dir, idx, self.targ_img_size)
 		norm_rgb = self.load_img(self.norm_dir, idx, self.targ_img_size)
-		norm_kappa = self.load_img(self.norm_unc_dir, idx, self.targ_img_size, raw=True)
+		norm_kappa = self.load_img(self.norm_unc_dir, idx, self.targ_img_size, grayscale=True)
 
 		norm_xyz = norm_rgb * 2 - 1
 		norm_alpha = kappa_to_alpha_np(norm_kappa)
