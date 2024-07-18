@@ -54,8 +54,8 @@ Load raw colmap data from automatic reconstruction
 """
 
 def _helper_read_colmap_images_txt(colmap_dir: str, image_list: list = None):
-	COLMAP_IMAGES = "/images.txt"
-	SUPPORTED_EXTENSIONS = (".jpg", ".png")
+	COLMAP_IMAGES = '/images.txt'
+	SUPPORTED_EXTENSIONS = ('.jpg', '.png', '.jpeg')
 	
 	# Token-to-index lookup table for easier parsing.
 	token_to_index = {
@@ -95,13 +95,16 @@ def _helper_read_colmap_images_txt(colmap_dir: str, image_list: list = None):
 					tr_vec = np.array([float(v) for v in line[token_to_index['trans_x']-1:token_to_index['trans_z']]])
 					# np.roll(rot_quat, -1)
 
-					rot[file_name_no_ext] = _rot_q_to_3x3(rot_quat).T
-					tr[file_name_no_ext] = tr_vec
+					rot_mat = _rot_q_to_3x3(rot_quat)
+					r_tr_vec = (-rot_mat) @ tr_vec
+
+					rot[file_name_no_ext] = rot_mat.T
+					tr[file_name_no_ext] = r_tr_vec
 		
 	return dict(R=rot, T=tr)
 
 def _helper_read_colmap_cameras_txt(colmap_dir: str):
-	COLMAP_CAMERAS = "/cameras.txt"
+	COLMAP_CAMERAS = '/cameras.txt'
 
 	params = {}
 	with open(colmap_dir + COLMAP_CAMERAS, 'r') as f:
