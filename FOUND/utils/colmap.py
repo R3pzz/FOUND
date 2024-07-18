@@ -57,19 +57,19 @@ def quat_to_3x3(quat):
 Load raw colmap data from automatic reconstruction
 """
 def raw_load_colmap_data(colmap_dir: str, image_list: list = None):
-	COLMAP_CAMERAS = "/cameras.txt"
-	COLMAP_IMAGES = "/images.txt"
-	EXTENSION = ".jpg"
+	COLMAP_CAMERAS = '/cameras.txt'
+	COLMAP_IMAGES = '/images.txt'
+	EXTENSIONS = ('.jpg', '.jpeg', '.png')
 	
 	rot = {}
 	tr = {}
 	params = {}
 	
-	with open(colmap_dir + COLMAP_IMAGES, "r") as imgfile:
+	with open(colmap_dir + COLMAP_IMAGES, 'r') as imgfile:
 		data = imgfile.read().replace('\n', ' ').split(' ')
 		
 		for i, token in enumerate(data):
-			if token.endswith(EXTENSION):
+			if token.endswith(EXTENSIONS):
 				# We've reached the last image description token - filename
 				# Now, read the previous 8 tokens.
 				img_params = data[i-8:i+1]
@@ -83,12 +83,13 @@ def raw_load_colmap_data(colmap_dir: str, image_list: list = None):
 				img_name = _remove_ext(img_params[8])
 				
 				rot[img_name] = quat_to_3x3([float(q0), float(q1), float(q2), float(q3)])
-				tr[img_name] = np.array([tx, ty, tz]).astype(float)
+				# This should be -rot * tr instead of tr
+				tr[img_name] = (-rot) @ np.array([tx, ty, tz]).astype(float)
 	
-	with open(colmap_dir + COLMAP_CAMERAS, "r") as camfile:
+	with open(colmap_dir + COLMAP_CAMERAS, 'r') as camfile:
 		data = camfile.readlines()[3].replace('\n', ' ').split(' ')
-		params["f"] = float(data[4])
-		params["cx"] = float(data[5])
-		params["cy"] = float(data[6])
+		params['f'] = float(data[4])
+		params['cx'] = float(data[5])
+		params['cy'] = float(data[6])
 	
 	return dict(image_list=image_list, R=rot, T=tr, params=params)
