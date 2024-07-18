@@ -1,5 +1,6 @@
 data
 found_venv
+test
 
 __pycache__
 exp
