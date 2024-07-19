@@ -12,7 +12,7 @@ class FitArgs(argparse.ArgumentParser):
 		self.add_argument('--device', type=str, default='cuda')
 		self.add_argument('--exp_name', default='unnamed', type=str, help="Experiment name")
 
-		self.add_argument('--alpha_threshold', default=30.0, type=float, help="Alpha threshold for silhouette (degrees)")
+		self.add_argument('--alpha_threshold', default=77.0, type=float, help="Alpha threshold for silhouette (degrees)")
 
 		# DATA PARAMS
 		self.add_argument('--data_folder', type=str, default='test_imgs/foot')

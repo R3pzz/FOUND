@@ -155,13 +155,13 @@ class FootScanDataset(Dataset):
 			if os.path.isfile(pth):
 				if grayscale:
 					rgb = cv2.imread(pth, cv2.IMREAD_UNCHANGED)
-					# apply the NTSC formula over rgb to convert it to grayscale
-					rgb = 0.2989 * rgb[:, :, 2] + 0.5870 * rgb[:, :, 1] + 0.1140 * rgb[:, :, 0]
+					if rgb.shape[2] == 3 or rgb.shape[2] == 4:
+						# apply the NTSC formula over rgb to convert it to grayscale
+						rgb = 0.2989 * rgb[:, :, 2] + 0.5870 * rgb[:, :, 1] + 0.1140 * rgb[:, :, 0]
 				else:
 					rgb = cv2.cvtColor(cv2.imread(pth), cv2.COLOR_BGR2RGB)
 
 				if targ_size != None:
-
 					current_aspect_ratio = rgb.shape[1] / rgb.shape[0]
 					targ_aspect_ratio = targ_size[1] / targ_size[0]
 					if current_aspect_ratio != targ_aspect_ratio:

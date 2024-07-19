@@ -1,7 +1,7 @@
 import numpy as np
 import json
 import os
-from pytorch3d.transforms import quaternion_to_matrix
+import torch
 
 def _remove_ext(f):
 	return os.path.splitext(f)[0]
@@ -38,7 +38,7 @@ def load_colmap_data(colmap_json: str, image_list: list = None):
 
 	return dict(image_list=image_list, R=R, T=T, params=data['camera'])
 
-def _rot_q_to_3x3(qvec):
+def _quat_to_mat(qvec):
 	q0 = qvec[0]
 	q1 = qvec[1]
 	q2 = qvec[2]
@@ -53,15 +53,6 @@ def _rot_q_to_3x3(qvec):
         [2 * (q1 * q3 - q0 * q2),
          2 * (q2 * q3 + q0 * q1),
          2 * (q0 * q0 + q3 * q3) - 1]])
-
-def _qua_to_3x3_v2(qua):
-	r, i, j, k = qua
-	two_s = 2.0 / (qua * qua).sum()
-	return np.array([
-		[1 - two_s * (j * j + k * k), two_s * (i * j - k * r), two_s * (i * k + j * r)],
-		[two_s * (i * j + k * r), 1 - two_s * (i * i + k * k), two_s * (j * k - i * r)],
-		[two_s * (i * k - j * r), two_s * (j * k + i * r), 1 - two_s * (i * i + j * j)]
-	])
 
 """
 Load raw colmap data from automatic reconstruction
@@ -106,15 +97,27 @@ def _helper_read_colmap_images_txt(colmap_dir: str, image_list: list = None):
 					
 					# Parse the image info
 					file_name_no_ext = _remove_ext(line[token_to_index['name']])
-					rot_quat = np.array([float(v) for v in line[token_to_index['rot_qw']-1:token_to_index['rot_qz']]])
-					tr_vec = np.array([float(v) for v in line[token_to_index['trans_x']-1:token_to_index['trans_z']]])
-					# np.roll(rot_quat, -1)
+					rotation = np.array(line[token_to_index['rot_qw']-1:token_to_index['rot_qz']]).astype(float)
+					position = np.array(line[token_to_index['trans_x']-1:token_to_index['trans_z']]).astype(float)
 
-					rot_mat = _qua_to_3x3_v2(rot_quat)
-					r_tr_vec = (-rot_mat) @ tr_vec
+					w2c = torch.eye(4)
+					w2c[:3, :3] = torch.FloatTensor(_quat_to_mat(rotation))
+					w2c[:3, 3] = torch.FloatTensor(position)
 
-					rot[file_name_no_ext] = rot_mat.T
-					tr[file_name_no_ext] = r_tr_vec
+					c2w = torch.inverse(w2c)
+					R, T = c2w[:3, :3], c2w[:3, 3:]
+					R = torch.stack([-R[:, 0], -R[:, 1], R[:, 2]], 1) # from RDF to LUF for Rotation
+
+					new_c2w = torch.cat([R, T], 1)
+					w2c = torch.linalg.inv(torch.cat((new_c2w, torch.Tensor([[0,0,0,1]])), 0))
+					R, T = w2c[:3, :3].permute(1, 0), w2c[:3, 3]
+					R = R[None]
+					T = T[None]
+
+					T = -R @ T
+
+					rot[file_name_no_ext] = R.detach().cpu().numpy()
+					tr[file_name_no_ext] = T.detach().cpu().numpy()
 
 					if image_list != None:
 						images.append(token)

@@ -34,7 +34,7 @@ def visualize_view(batch, res, GT_mesh_data=None, norm_err=None):
 	pred_norm_vis = res['norm_rgb'] * res['sil'].unsqueeze(-1)
 
 	vis_elements = [
-				[batch['rgb'], batch['sil'], gt_norm_vis],
+				[batch['rgb'], batch['sil'], gt_norm_vis, batch['norm_kappa']],
 				[res['rgb'], res['sil'], pred_norm_vis, show_kps(res['rgb'], pred_kps_np, col=(0, 0, 255))],
 				[None, seg_overlap(batch['sil'], res['sil']), norm_err]
 				]
