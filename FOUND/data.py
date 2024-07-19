@@ -155,6 +155,8 @@ class FootScanDataset(Dataset):
 			if os.path.isfile(pth):
 				if grayscale:
 					rgb = cv2.imread(pth, cv2.IMREAD_UNCHANGED)
+					# apply the NTSC formula over rgb to convert it to grayscale
+					rgb = 0.2989 * rgb[:, :, 2] + 0.5870 * rgb[:, :, 1] + 0.1140 * rgb[:, :, 0]
 				else:
 					rgb = cv2.cvtColor(cv2.imread(pth), cv2.COLOR_BGR2RGB)
 
