@@ -154,7 +154,7 @@ class FootScanDataset(Dataset):
 			pth = os.path.join(self.src, directory, f'{loc}.{e}')
 			if os.path.isfile(pth):
 				if grayscale:
-					rgb = cv2.imread(pth, cv2.IMREAD_GRAYSCALE)
+					rgb = cv2.imread(pth, cv2.IMREAD_UNCHANGED)
 				else:
 					rgb = cv2.cvtColor(cv2.imread(pth), cv2.COLOR_BGR2RGB)
 
