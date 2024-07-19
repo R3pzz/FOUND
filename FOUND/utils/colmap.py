@@ -1,6 +1,7 @@
 import numpy as np
 import json
 import os
+from pytorch3d.transforms import quaternion_to_matrix
 
 def _remove_ext(f):
 	return os.path.splitext(f)[0]
@@ -53,6 +54,15 @@ def _rot_q_to_3x3(qvec):
          2 * (q2 * q3 + q0 * q1),
          2 * (q0 * q0 + q3 * q3) - 1]])
 
+def _qua_to_3x3_v2(qua):
+	r, i, j, k = qua
+	two_s = 2.0 / (qua * qua).sum()
+	return np.array([
+		[1 - two_s * (j * j + k * k), two_s * (i * j - k * r), two_s * (i * k + j * r)],
+		[two_s * (i * j + k * r), 1 - two_s * (i * i + k * k), two_s * (j * k - i * r)],
+		[two_s * (i * k - j * r), two_s * (j * k + i * r), 1 - two_s * (i * i + j * j)]
+	])
+
 """
 Load raw colmap data from automatic reconstruction
 """
@@ -100,7 +110,7 @@ def _helper_read_colmap_images_txt(colmap_dir: str, image_list: list = None):
 					tr_vec = np.array([float(v) for v in line[token_to_index['trans_x']-1:token_to_index['trans_z']]])
 					# np.roll(rot_quat, -1)
 
-					rot_mat = _rot_q_to_3x3(rot_quat)
+					rot_mat = _qua_to_3x3_v2(rot_quat)
 					r_tr_vec = (-rot_mat) @ tr_vec
 
 					rot[file_name_no_ext] = rot_mat.T
