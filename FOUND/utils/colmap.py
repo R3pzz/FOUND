@@ -101,10 +101,7 @@ def _helper_read_colmap_images_txt(colmap_dir: str, image_list: list = None):
 					qvec = np.array(line[token_to_index['rot_qw']-1:token_to_index['rot_qz']]).astype(float)
 					tvec = np.array(line[token_to_index['trans_x']-1:token_to_index['trans_z']]).astype(float)
 
-					q = torch.tensor(qvec)
-					q = q[[1, 2, 3, 0]]
-					rotmat = quaternion_to_matrix(q).cpu().detach().numpy()
-
+					rotmat = _quat_to_mat(qvec)
 					tvec = -rotmat @ tvec
 
 					rot[file_name_no_ext] = rotmat
