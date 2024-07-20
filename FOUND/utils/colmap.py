@@ -43,17 +43,17 @@ def _quat_to_mat(qvec):
 	q0 = qvec[0] # scalar
 	q1 = -qvec[1] # x
 	q2 = -qvec[2] # y
-	q3 = qvec[3] # z
+	q3 = -qvec[3] # z
 	return np.array([
-        [2 * (q0**2 + q1**2) - 1,
-         2 * (q1 * q2 - q0 * q3),
-         2 * (q1 * q3 + q0 * q2)],
-        [2 * (q1 * q2 + q0 * q3),
-         2 * (q0 * q0 + q2 * q2) - 1,
-         2 * (q2 * q3 - q0 * q1)],
-        [2 * (q1 * q3 - q0 * q2),
-         2 * (q2 * q3 + q0 * q1),
-         2 * (q0 * q0 + q3 * q3) - 1]])
+        [1 - 2 * q2 ** 2 - 2 * q3 ** 2,
+         2 * q1 * q2 - 2 * q0 * q3,
+         2 * q3 * q1 + 2 * q0 * q2],
+        [2 * q1 * q2 + 2 * q0 * q3,
+         1 - 2 * q1 ** 2 - 2 * q3 ** 2,
+         2 * q2 * q3 - 2 * q0 * q1],
+        [2 * q3 * q1 - 2 * q0 * q2,
+         2 * q2 * q3 + 2 * q0 * q1,
+         1 - 2 * q1 ** 2 - 2 * q2 ** 2]])
 
 """
 Load raw colmap data from automatic reconstruction
