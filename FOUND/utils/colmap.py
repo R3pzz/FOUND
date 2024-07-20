@@ -2,6 +2,7 @@ import numpy as np
 import json
 import os
 import torch
+from pytorch3d.transforms import quaternion_to_matrix
 
 def _remove_ext(f):
 	return os.path.splitext(f)[0]
@@ -39,10 +40,10 @@ def load_colmap_data(colmap_json: str, image_list: list = None):
 	return dict(image_list=image_list, R=R, T=T, params=data['camera'])
 
 def _quat_to_mat(qvec):
-	q0 = qvec[0]
-	q1 = qvec[1]
-	q2 = qvec[2]
-	q3 = qvec[3]
+	q0 = qvec[0] # scalar
+	q1 = -qvec[1] # x
+	q2 = -qvec[2] # y
+	q3 = qvec[3] # z
 	return np.array([
         [2 * (q0**2 + q1**2) - 1,
          2 * (q1 * q2 - q0 * q3),
@@ -97,27 +98,17 @@ def _helper_read_colmap_images_txt(colmap_dir: str, image_list: list = None):
 					
 					# Parse the image info
 					file_name_no_ext = _remove_ext(line[token_to_index['name']])
-					rotation = np.array(line[token_to_index['rot_qw']-1:token_to_index['rot_qz']]).astype(float)
-					position = np.array(line[token_to_index['trans_x']-1:token_to_index['trans_z']]).astype(float)
+					qvec = np.array(line[token_to_index['rot_qw']-1:token_to_index['rot_qz']]).astype(float)
+					tvec = np.array(line[token_to_index['trans_x']-1:token_to_index['trans_z']]).astype(float)
 
-					w2c = torch.eye(4)
-					w2c[:3, :3] = torch.FloatTensor(_quat_to_mat(rotation))
-					w2c[:3, 3] = torch.FloatTensor(position)
+					q = torch.tensor(qvec)
+					q = q[[1, 2, 3, 0]]
+					rotmat = quaternion_to_matrix(q).cpu().detach().numpy()
 
-					c2w = torch.inverse(w2c)
-					R, T = c2w[:3, :3], c2w[:3, 3:]
-					R = torch.stack([-R[:, 0], -R[:, 1], R[:, 2]], 1) # from RDF to LUF for Rotation
+					tvec = -rotmat @ tvec
 
-					new_c2w = torch.cat([R, T], 1)
-					w2c = torch.linalg.inv(torch.cat((new_c2w, torch.Tensor([[0,0,0,1]])), 0))
-					R, T = w2c[:3, :3].permute(1, 0), w2c[:3, 3]
-					R = R[None]
-					T = T[None]
-
-					T = -R @ T
-
-					rot[file_name_no_ext] = R.detach().cpu().numpy()
-					tr[file_name_no_ext] = T.detach().cpu().numpy()
+					rot[file_name_no_ext] = rotmat
+					tr[file_name_no_ext] = tvec
 
 					if image_list != None:
 						images.append(token)
