@@ -41,9 +41,9 @@ def load_colmap_data(colmap_json: str, image_list: list = None):
 
 def _quat_to_mat(qvec):
 	q0 = qvec[0] # scalar
-	q1 = -qvec[1] # x
-	q2 = -qvec[2] # y
-	q3 = -qvec[3] # z
+	q1 = qvec[1] # x
+	q2 = qvec[2] # y
+	q3 = qvec[3] # z
 	return np.array([
         [1 - 2 * q2 ** 2 - 2 * q3 ** 2,
          2 * q1 * q2 - 2 * q0 * q3,
@@ -62,20 +62,6 @@ Load raw colmap data from automatic reconstruction
 def _helper_read_colmap_images_txt(colmap_dir: str, image_list: list = None):
 	COLMAP_IMAGES = '/images.txt'
 	SUPPORTED_EXTENSIONS = ('.jpg', '.png', '.jpeg')
-	
-	# Token-to-index lookup table for easier parsing.
-	token_to_index = {
-		'image_id': 0,
-		'rot_qw': 1,
-		'rot_qx': 2,
-		'rot_qy': 3,
-		'rot_qz': 4,
-		'trans_x': 5,
-		'trans_y': 6,
-		'trans_z': 7,
-		'camera_id': 8,
-		'name': 9,
-	}
 
 	rot = {}
 	tr = {}
@@ -97,9 +83,9 @@ def _helper_read_colmap_images_txt(colmap_dir: str, image_list: list = None):
 						continue
 					
 					# Parse the image info
-					file_name_no_ext = _remove_ext(line[token_to_index['name']])
-					qvec = np.array(line[token_to_index['rot_qw']-1:token_to_index['rot_qz']]).astype(float)
-					tvec = np.array(line[token_to_index['trans_x']-1:token_to_index['trans_z']]).astype(float)
+					file_name_no_ext = _remove_ext(line[9])
+					qvec = np.array(line[1:5]).astype(float)
+					tvec = np.array(line[5:8]).astype(float)
 
 					rotmat = _quat_to_mat(qvec)
 					tvec = -rotmat @ tvec
@@ -107,7 +93,7 @@ def _helper_read_colmap_images_txt(colmap_dir: str, image_list: list = None):
 					rot[file_name_no_ext] = rotmat
 					tr[file_name_no_ext] = tvec
 
-					if image_list != None:
+					if image_list == None:
 						images.append(token)
 		
 	return dict(image_list=images, R=rot, T=tr)
