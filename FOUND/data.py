@@ -64,8 +64,7 @@ class FootScanDataset(Dataset):
 				if not os.path.isfile(os.path.join(src, 'colmap', f)):
 					raise FileNotFoundError(f"Colmap data not found in {src}")
 			
-			# Load the raw colmap data
-			self.colmap_data = raw_load_colmap_data(os.path.join(src, 'colmap'))
+			raise RuntimeError('raw colmap reconstruction loading not implemented')
 		else:
 			colmap_loc = os.path.join(src, 'colmap.json')
 			# Check for the colmap file

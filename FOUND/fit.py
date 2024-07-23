@@ -50,7 +50,7 @@ def main(args):
 	os.makedirs(exp_dir, exist_ok=True)
 
 	folder_names = dict(rgb=args.rgb_folder, norm=args.norm_folder, norm_unc=args.norm_unc_folder)
-	dataset = FootScanDataset(args.data_folder, targ_img_size=args.targ_img_size, folder_names=folder_names, raw_colmap=args.raw_colmap)
+	dataset = FootScanDataset(args.data_folder, targ_img_size=args.targ_img_size, folder_names=folder_names, raw_colmap=args.raw_colmap, disable_keypoints=args.disable_keypoints)
 	
 	if args.restrict_num_views is not None:
 		dataset.restrict_views(args.restrict_num_views)
@@ -119,7 +119,7 @@ def main(args):
 
 					res['new_mesh'] = new_mesh
 
-					loss_dict = calc_losses(res, batch, stage.losses, {'img_size': args.targ_img_size})
+					loss_dict = calc_losses(res, batch, stage.losses, {'img_size': args.targ_img_size}, disable_keypoints=args.disable_keypoints)
 					loss = sum(loss_dict[k] * loss_weights[k] for k in stage.losses)
 
 					loss.backward()
