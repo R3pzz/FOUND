@@ -200,8 +200,8 @@ class FootScanDataset(Dataset):
 			kps = np.concatenate([kps_raw, kps_vis[..., None]], axis=-1) # resized (x, y) coord + vis flag [size K x 3]
 			kps_unc = kps_var * self.resize_fac ** 2 # resized (sigma_x, sigma_y) ** 2 uncertainties [size K x 2]
 		else:
-			kps = None
-			kps_unc = None
+			kps = []
+			kps_unc = []
 
 		out = {
 			'key': idx,
