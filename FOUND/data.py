@@ -87,18 +87,16 @@ class FootScanDataset(Dataset):
 
 		# load keypoint labels
 		self.disable_keypoints = disable_keypoints
-		if not disable_keypoints:
-			kp_loc = os.path.join(src, 'keypoints.json')
-			if os.path.isfile(kp_loc):
-				with open(kp_loc, 'r') as f:
-					kp_data = json.load(f)
+		kp_loc = os.path.join(src, 'keypoints.json')
+		if not disable_keypoints and os.path.isfile(kp_loc):
+			with open(kp_loc, 'r') as f:
+				kp_data = json.load(f)
 
-				self.kp_labels = kp_data['kp_labels']
-			else:
-				warnings.warn(f"Keypoint labels not found at {kp_loc}")
-				self.kp_labels = None
-
+			self.kp_labels = kp_data['kp_labels']
 			self.kp_data = {_remove_ext(k): v for k, v in kp_data['annotations'].items()}
+		else:
+			warnings.warn(f"Keypoint labels not found at {kp_loc}")
+			self.kp_labels = None
 
 		# load cacher
 		self.cacher = Cacher()
