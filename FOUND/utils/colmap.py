@@ -82,28 +82,8 @@ def _helper_read_colmap_images_txt(colmap_dir: str, image_list: list = None):
 					if image_list != None and token not in image_list:
 						continue
 					
-					# Parse the image info
-					file_name_no_ext = _remove_ext(line[9])
-					qvec = np.array(line[1:5]).astype(float)
-					tvec = np.array(line[5:8]).astype(float)
-
-					w2c = np.eye(4)
-					w2c[:3, :3] = _quat_to_mat(qvec)
-					w2c[:3, 3] = tvec
-
-					c2w = np.linalg.inv(w2c) # to c2w
-					R, T = c2w[:3, :3], c2w[:3, 3:] # extract matrices
-					R = np.stack([-R[:, 0], -R[:, 1], R[:, 2]], 1) # convert between coordinate systems
-					
-					new_c2w = np.cat([R, T], 1)
-					w2c = np.linalg.inv(np.cat((new_c2w, np.array([[0,0,0,1]])), 0))
-					R, T = w2c[:3, :3].transpose(1, 0), w2c[:3, 3] # convert R to row-major matrix
-
-					rotmat = _quat_to_mat(qvec)
-					tvec = -rotmat @ tvec
-
-					rot[file_name_no_ext] = rotmat
-					tr[file_name_no_ext] = tvec
+					# Temp - further replace it with what we have in colab for parsing sparse reconstructions.
+					raise RuntimeError('_helper_read_colmap_images_txt does not have an implementation for camera pose extraction')
 
 					if image_list == None:
 						images.append(token)
