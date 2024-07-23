@@ -21,7 +21,7 @@ def batch_to_device(batch: dict, device: str):
 	"""Return a copy of batch, with all tensors moved to device"""
 	return {k: v if not torch.is_tensor(v) else v.to(device) for k, v in batch.items()}
 
-def calc_losses(res: dict, batch: dict, loss_list: list, aux: dict) -> dict:
+def calc_losses(res: dict, batch: dict, loss_list: list, aux: dict, disable_keypoints: bool) -> dict:
 	"""Run forward pass of all losses, return dict of loss values.
 	
 	:param res: dict of outputs from model
@@ -51,8 +51,8 @@ def calc_losses(res: dict, batch: dict, loss_list: list, aux: dict) -> dict:
 
 	if 'edge' in loss_list:
 		loss_dict['edge'] = mesh_edge_loss(res['new_mesh'])
-
-	if any(k in loss_list for k in KP_LOSSES):
+	
+	if not disable_keypoints and any(k in loss_list for k in KP_LOSSES):
 		y = res['kps']
 		mu, visibility = batch['kps'][..., :2], batch['kps'][..., 2:]
 		var = batch['kps_unc']

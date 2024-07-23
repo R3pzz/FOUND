@@ -13,13 +13,14 @@ class FitArgs(argparse.ArgumentParser):
 		self.add_argument('--exp_name', default='unnamed', type=str, help="Experiment name")
 
 		self.add_argument('--alpha_threshold', default=30.0, type=float, help="Alpha threshold for silhouette (degrees)")
-
+		
 		# DATA PARAMS
 		self.add_argument('--data_folder', type=str, default='test_imgs/foot')
 		self.add_argument('--targ_img_size', default=(192, 144), type=tuple, help='(H, W) - Resize images to this size.')
 		self.add_argument('--include_gt_mesh', action='store_true', help="Use GT mesh while validating."
 																		"Note: must be in data_folder, as mesh.obj")
-		self.add_argument('--raw_colmap', action='store_true', help= "Use raw colmap data instead of preprocessed")
+		self.add_argument('--raw_colmap', action='store_true', help= "Use raw COLMAP data instead of preprocessed")
+		self.add_argument('--disable_keypoints', action='store_true', help= "Disable keypoint losses for the model(no keypoints.json is necessary in this mode)")
 
 		# Folder names - change these if your folder structure is different to the default
 		self.add_argument('--rgb_folder', type=str, default='rgb', help="Name of folder containing RGB images")

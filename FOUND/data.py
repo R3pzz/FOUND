@@ -33,7 +33,7 @@ class Cacher():
 
 class FootScanDataset(Dataset):
 	"""Load a multiview captured foot scan dataset."""
-	def __init__(self, src, targ_img_size, folder_names: dict, raw_colmap: bool):
+	def __init__(self, src, targ_img_size, folder_names: dict, raw_colmap: bool, disable_keypoints: bool):
 		"""
 
 		:param src:
@@ -87,18 +87,19 @@ class FootScanDataset(Dataset):
 		# TODO
 
 		# load keypoint labels
-		kp_loc = os.path.join(src, 'keypoints.json')
-		if os.path.isfile(kp_loc):
+		self.disable_keypoints = disable_keypoints
+		if not disable_keypoints:
+			kp_loc = os.path.join(src, 'keypoints.json')
+			if os.path.isfile(kp_loc):
+				with open(kp_loc, 'r') as f:
+					kp_data = json.load(f)
 
-			with open(kp_loc, 'r') as f:
-				kp_data = json.load(f)
+				self.kp_labels = kp_data['kp_labels']
+			else:
+				warnings.warn(f"Keypoint labels not found at {kp_loc}")
+				self.kp_labels = None
 
-			self.kp_labels = kp_data['kp_labels']
-		else:
-			warnings.warn(f"Keypoint labels not found at {kp_loc}")
-			self.kp_labels = None
-
-		# self.kp_data = {_remove_ext(k): v for k, v in kp_data['annotations'].items()}
+			self.kp_data = {_remove_ext(k): v for k, v in kp_data['annotations'].items()}
 
 		# load cacher
 		self.cacher = Cacher()
@@ -193,13 +194,17 @@ class FootScanDataset(Dataset):
 		T = self.colmap_data['T'][idx]
 
 		# load keypoints
-		# kp_data = self.kp_data[idx]
-		# kps_raw = np.array(kp_data['kps']) * self.resize_fac
-		# kps_vis = np.array(kp_data['vis'])
-		# kps_var = np.array(kp_data['variance'])
+		if not self.disable_keypoints:
+			kp_data = self.kp_data[idx]
+			kps_raw = np.array(kp_data['kps']) * self.resize_fac
+			kps_vis = np.array(kp_data['vis'])
+			kps_var = np.array(kp_data['variance'])
 
-		# kps = np.concatenate([kps_raw, kps_vis[..., None]], axis=-1) # resized (x, y) coord + vis flag [size K x 3]
-		# kps_unc = kps_var * self.resize_fac ** 2 # resized (sigma_x, sigma_y) ** 2 uncertainties [size K x 2]
+			kps = np.concatenate([kps_raw, kps_vis[..., None]], axis=-1) # resized (x, y) coord + vis flag [size K x 3]
+			kps_unc = kps_var * self.resize_fac ** 2 # resized (sigma_x, sigma_y) ** 2 uncertainties [size K x 2]
+		else:
+			kps = None
+			kps_unc = None
 
 		out = {
 			'key': idx,
@@ -210,8 +215,8 @@ class FootScanDataset(Dataset):
 			'norm_alpha': norm_alpha,
 			'R': R,
 			'T': T,
-#			'kps': kps,
-#			'kps_unc': kps_unc
+			'kps': kps,
+			'kps_unc': kps_unc
 		}
 
 		self.cacher.add(idx, out)

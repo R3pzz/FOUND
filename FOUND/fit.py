@@ -20,10 +20,8 @@ from utils.pytorch3d import export_mesh
 
 Stage = namedtuple('Stage', 'name num_epochs lr params losses')
 DEFAULT_STAGES = [
-	Stage('Registration', 50, .001, ['reg'], ['kp_nll']),
-	Stage('Deform verts', 250, .001, ['deform', 'reg'], ['kp_nll', 'sil', 'norm_nll']),
+	Stage('Deform verts', 250, .001, ['deform', 'reg'], ['sil', 'norm_nll']),
 ]
-
 
 def visualize_view(batch, res, GT_mesh_data=None, norm_err=None):
 	"""Visualize a reconstruction view given GT data, predicted data, and optionally GT_mesh data.
@@ -51,7 +49,6 @@ def main(args):
 	exp_dir = os.path.join('exp', args.exp_name)
 	os.makedirs(exp_dir, exist_ok=True)
 
-
 	folder_names = dict(rgb=args.rgb_folder, norm=args.norm_folder, norm_unc=args.norm_unc_folder)
 	dataset = FootScanDataset(args.data_folder, targ_img_size=args.targ_img_size, folder_names=folder_names, raw_colmap=args.raw_colmap)
 	
@@ -67,6 +64,10 @@ def main(args):
 				 kp_labels=dataset.kp_labels,
 				 opt_posevec=not args.no_posevec_param).to(device)
 
+	# Add the keypoint registration stage if not requested otherwise.
+	if not args.disable_keypoints:
+		DEFAULT_STAGES.insert(0, Stage('Registration', 50, .001, ['reg'], ['kp_nll']))
+	
 	STAGES = args.stages if args.stages is not None else DEFAULT_STAGES
 	loss_weights = {k: getattr(args, f'weight_{k}') for k in LOSS_KEYS}
 	losses_per_stage = []
